@@ -18,7 +18,7 @@
 
 
 
-#define PLUGIN_VERSION 		"2.6"
+#define PLUGIN_VERSION 		"2.7"
 
 /*======================================================================================
 	Plugin Info:
@@ -31,6 +31,9 @@
 
 ========================================================================================
 	Change Log:
+
+2.7 (06-Dec-2021)
+	- Fixed the last version breaking plugin functionality. Thanks to "sorallll" for reporting.
 
 2.6 (27-Nov-2021)
 	- Fixed "Failed to grow array" error. Thanks to "azureblue" for reporting.
@@ -206,7 +209,7 @@ public void OnNextFrame(any na)
 
 	// Swap the buffers so we don't add to the list we're currently processing in our InsertServerCommand hook.
 	// Executes the ConVars/commands in the order they were.
-	ArrayList sCmdList = g_sCommandList;
+	ArrayList sCmdList = g_sCommandList.Clone();
 	g_sCommandList.Clear();
 
 	static char sCommand[ARGS_BUFFER_LENGTH];
