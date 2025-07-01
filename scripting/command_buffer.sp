@@ -1,6 +1,6 @@
 /*
 *	[ANY] Command and ConVar - Buffer Overflow Fixer
-*	Copyright (C) 2024 Silvers
+*	Copyright (C) 2025 Silvers
 *
 *	This program is free software: you can redistribute it and/or modify
 *	it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 
 
 
-#define PLUGIN_VERSION 		"2.9"
+#define PLUGIN_VERSION 		"2.9b"
 
 /*======================================================================================
 	Plugin Info:
@@ -31,6 +31,12 @@
 
 ========================================================================================
 	Change Log:
+
+2.9b (01-Jul-2025)
+	- Updated GameData to support the "Black Mesa" and "Insurgency" games. Thanks to "JustDoItSH" for reporting and requesting.
+
+2.9a (05-Aug-2024)
+	- Fixed TF2 signature being broken on Windows due to some game udpate. Thanks to "LapplandBro" for reporting.
 
 2.9 (23-Jan-2024)
 	- Fixed memory leak from clearing ArrayList handles. Thanks to "HarryPotter" for help solving.
