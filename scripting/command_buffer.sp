@@ -1,6 +1,6 @@
 /*
 *	[ANY] Command and ConVar - Buffer Overflow Fixer
-*	Copyright (C) 2025 Silvers
+*	Copyright (C) 2026 Silvers
 *
 *	This program is free software: you can redistribute it and/or modify
 *	it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 
 
 
-#define PLUGIN_VERSION 		"2.9b"
+#define PLUGIN_VERSION 		"2.10"
 
 /*======================================================================================
 	Plugin Info:
@@ -31,6 +31,9 @@
 
 ========================================================================================
 	Change Log:
+
+2.10 (18-Jun-2026)
+	- Optimizations. Thanks to "ayrton09_arg" for providing.
 
 2.9b (01-Jul-2025)
 	- Updated GameData to support the "Black Mesa" and "Insurgency" games. Thanks to "JustDoItSH" for reporting and requesting.
@@ -99,14 +102,14 @@
 #define GAMEDATA			"command_buffer.games"
 #define ARGS_BUFFER_LENGTH	8192
 
-#define DEBUGGING			0
+#define DEBUGGING			1
+
 #if DEBUGGING
 #define MAX_CVARS			5000
 #endif
 
 bool g_NextFrame;
 ArrayList g_aCommandList;
-char g_sCurrentCommand[ARGS_BUFFER_LENGTH];
 
 public Plugin myinfo =
 {
@@ -166,13 +169,15 @@ Action sm_cvar_test(int client, int args)
 	int cv;
 	ConVar cvar;
 	char temp[64];
+
 	for( int i = 0; i < MAX_CVARS; i++ )
 	{
 		Format(temp, sizeof(temp), "sm_cvar_test_%d", i);
 		cvar = FindConVar(temp);
 		if( cvar != null && cvar.IntValue != 1 ) cv++;
 	}
-	ReplyToCommand(c, "%d out of %d cvars are wrong.", cv, MAX_CVARS);
+
+	ReplyToCommand(client, "%d out of %d cvars are wrong.", cv, MAX_CVARS);
 	return Plugin_Handled;
 }
 #endif
@@ -182,16 +187,13 @@ Action sm_cvar_test(int client, int args)
 // ====================================================================================================
 MRESReturn InsertCommand(Handle hReturn, Handle hParams)
 {
-	// Get command argument.
-	DHookGetParamString(hParams, 1, g_sCurrentCommand, sizeof(g_sCurrentCommand));
 	return MRES_Ignored;
 }
 
 MRESReturn InsertCommandPost(Handle hReturn, Handle hParams)
 {
 	// See if the server was able to insert the command just fine.
-	bool bSuccess = DHookGetReturn(hReturn);
-	if( bSuccess )
+	if( DHookGetReturn(hReturn) )
 		return MRES_Ignored;
 
 	// The command buffer overflowed. Add the commands again on the next frame.
@@ -201,12 +203,16 @@ MRESReturn InsertCommandPost(Handle hReturn, Handle hParams)
 		RequestFrame(OnNextFrame);
 	}
 
+	// Get command argument.
+	static char sCurrentCommand[ARGS_BUFFER_LENGTH];
+	DHookGetParamString(hParams, 1, sCurrentCommand, sizeof(sCurrentCommand));
+
 	// Debug print
 	#if DEBUGGING
-		PrintToServer("Fix: [%s]", g_sCurrentCommand);
+		PrintToServer("Fix: [%s]", sCurrentCommand);
 	#endif
 
-	g_aCommandList.PushString(g_sCurrentCommand);
+	g_aCommandList.PushString(sCurrentCommand);
 
 	// Prevent "Cbuf_AddText: buffer overflow" message
 	DHookSetReturn(hReturn, true);
@@ -224,10 +230,9 @@ void OnNextFrame(any na)
 
 	// Swap the buffers so we don't add to the list we're currently processing in our InsertServerCommand hook.
 	// Executes the ConVars/commands in the order they were.
-	ArrayList aCmdList = g_aCommandList.Clone();
+	ArrayList aCmdList = g_aCommandList;
 
 	// g_aCommandList.Clear(); // Does not free memory, delete and re-create.
-	delete g_aCommandList;
 	g_aCommandList = new ArrayList(ByteCountToCells(ARGS_BUFFER_LENGTH));
 
 	static char sCommand[ARGS_BUFFER_LENGTH];
