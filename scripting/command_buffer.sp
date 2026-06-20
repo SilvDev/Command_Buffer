@@ -18,7 +18,7 @@
 
 
 
-#define PLUGIN_VERSION 		"2.10"
+#define PLUGIN_VERSION 		"2.11"
 
 /*======================================================================================
 	Plugin Info:
@@ -31,6 +31,9 @@
 
 ========================================================================================
 	Change Log:
+
+2.11 (20-Jun-2026)
+	- Reverted debugging back to "0". Thanks to "uni963" for reporting.
 
 2.10 (18-Jun-2026)
 	- Optimizations. Thanks to "ayrton09_arg" for providing.
@@ -102,7 +105,7 @@
 #define GAMEDATA			"command_buffer.games"
 #define ARGS_BUFFER_LENGTH	8192
 
-#define DEBUGGING			1
+#define DEBUGGING			0
 
 #if DEBUGGING
 #define MAX_CVARS			5000
